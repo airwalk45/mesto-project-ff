@@ -12,6 +12,7 @@ function addCard(item,deleteCard) {
 
   cardElement.querySelector('.card__image').src = item.link;
   cardElement.querySelector('.card__title').textContent = item.name;
+  cardElement.querySelector('.card__image').alt = item.name;
 
   deleteButton.addEventListener('click', deleteCard);
   
@@ -20,7 +21,7 @@ function addCard(item,deleteCard) {
 
 // @todo: Функция удаления карточки
 function removeCard(evt) {
-  evt.target.parentElement.remove();
+  evt.target.closest('.card').remove();
 };
 
 // @todo: Вывести карточки на страницу
