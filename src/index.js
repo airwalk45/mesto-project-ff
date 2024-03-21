@@ -1,143 +1,137 @@
-// список карточек
-const cardList = document.querySelector(".places__list");
+/*=====================
+Блок импорта
+=======================*/
+import "./pages/index.css"; //Главный CSS
+import {
+  addCard,
+  removeCard,
+  addLikeToCard
+} from "./scripts/cards.js";  //функции карточек
+import { openModal, closeModal } from "./scripts/modal.js";   //функции попапов
+import { initialCards } from "./scripts/initialCards.js";   //базовые страницы при загрузке
 
-// темплейт карточки
-const cardTemplate = document.querySelector("#card-template").content;
+/*=====================
+Блок констант
+=======================*/
+const cardList = document.querySelector(".places__list"); // список карточек
+const cardTemplate = document.querySelector("#card-template").content; // темплейт карточки
+const addCardObj = {
+  item: '',
+  removeCard: removeCard,
+  cardTemplate : cardTemplate,
+  addLikeToCard: addLikeToCard,
+  zoomCardImg: zoomCardImg,
+};  // объект с необходимым содержимым для функции создания карточки
+const buttonNewCard = document.querySelector(".profile__add-button");// кнопка добавления новой карточки
+const buttonEdit = document.querySelector(".profile__edit-button");// кнопка редактирования заголовка страницы
+const modalNewCard = document.querySelector(".popup_type_new-card");// попап добавления новой карточки
+const modalEdit = document.querySelector(".popup_type_edit");// попап добавления новой карточки
+const modalImageZoom = document.querySelector(".popup_type_image");// попап увеличенного просмотра карточки
+const popups = document.querySelectorAll(".popup"); //Массив всех всплывающих окон с общим классом
+
+const profileForm = document.querySelector('[name="edit-profile"]');// форма редактирования шапки страницы
+const nameInput = profileForm.querySelector('[name="name"]');// поле ввода имени в форме для шапки страницы
+const jobInput = profileForm.querySelector('[name="description"]');// поле ввода описания в форме для шапки страницы
+
+const profileTitle = document.querySelector(".profile__title");// имя в шапке страницы
+const profileDescription = document.querySelector(".profile__description");// описание в шапке страницы
+
+const formNewCard = document.querySelector('[name="new-place"]');
+const placeName = formNewCard.querySelector('[name="place-name"]');
+const linkUrl = formNewCard.querySelector('[name="link"]');
+
+/*=====================
+Блок функций
+=======================*/
+// @todo: Функция zoom карточки
+function zoomCardImg(evt) {
+  const popupImage = document.querySelector(".popup__image"); //изображение на всплывающем окне "Зум изображения"
+  const popupCaption = document.querySelector(".popup__caption"); //подпись на всплывающем окне "Зум изображения"
+  popupImage.src = evt.target.src;
+  popupImage.alt = evt.target.alt;
+  popupCaption.textContent = evt.target.alt;
+  openModal(modalImageZoom);
+}
+
+function addCardElement(item, method = "prepend") {
+  addCardObj.item = item;
+  const cardElement = addCard(addCardObj);
+  cardList[method](cardElement);    
+}
 
 // вывод карточек на страницу перебором
 initialCards.forEach((item) => {
-  cardList.append(
-    addCard(item, removeCard, cardTemplate, AddLikeToCard, zoomCardImg)
-  );
+  addCardElement(item, "append")
 });
 
-// кнопка добавления новой карточки
-const button_new_card = document.querySelector(".profile__add-button");
-// кнопка редактирования заголовка страницы
-const button_edit = document.querySelector(".profile__edit-button");
-// попап добавления новой карточки
-const modal_new_card = document.querySelector(".popup_type_new-card");
-// попап добавления новой карточки
-const modal_edit = document.querySelector(".popup_type_edit");
-// попап увеличенного просмотра карточки
-const modal_image_zoom = document.querySelector(".popup_type_image");
-
 // добавление на попап плавного открытия и закрытия
-modal_new_card.classList.add("popup_is-animated");
-modal_edit.classList.add("popup_is-animated");
-modal_image_zoom.classList.add("popup_is-animated");
-
-const popup = document.querySelectorAll(".popup"); //Массив всех всплывающих окон с общим классом
-//const popup_image = document.querySelector('.popup__image');        //изображение на всплывающем окне "Зум изображения"
-//const popup_caption = document.querySelector('.popup__caption');    //подпись на всплывающем окне "Зум изображения"
-
-const button_close_card = document.querySelector(".popup__close");
+modalNewCard.classList.add("popup_is-animated");
+modalEdit.classList.add("popup_is-animated");
+modalImageZoom.classList.add("popup_is-animated");
 
 // @todo: Слушатель открытия popUp
-button_new_card.addEventListener("click", () => {
-  openModal(modal_new_card);
+buttonNewCard.addEventListener("click", () => {
+  openModal(modalNewCard);
 });
 
 // @todo: Слушатель открытия popUp редактирования шапки страницы
-button_edit.addEventListener("click", () => {
-  openModal(modal_edit);
-  // Заполняем поля текстом из шапки страницы при открывании, поможет если поля при каких-то причинах изменились в обход поля редактирования
-  const formElement = document.querySelector(".popup__form");
+buttonEdit.addEventListener("click", () => {
+  openModal(modalEdit);
   // Находим поля формы в DOM
-  const nameInput = formElement.querySelector(".popup__input_type_name");
-  const jobInput = formElement.querySelector(".popup__input_type_description");
-
-  const profileTitle = document.querySelector(".profile__title");
-  const profileDescription = document.querySelector(".profile__description");
 
   nameInput.value = profileTitle.textContent;
   jobInput.value = profileDescription.textContent;
 });
 
-// @todo: Слушатель закрытия popUp по кнопке крестик
-document.addEventListener("click", (evt) => {
-  if (evt.target.classList.contains("popup__close")) {
-    const Modal = evt.target.closest(".popup_is-opened");
-    closeModal(Modal);
-  }
-});
-
-// @todo: Слушатель закрытия по overlay
-popup.forEach((evt) => {
-  evt.addEventListener("click", function (evt) {
-    if (evt.target === evt.currentTarget) {
-      const Modal = evt.target.closest(".popup_is-opened");
-      closeModal(Modal);
-    }
+popups.forEach((popup) => {
+    popup.addEventListener('mousedown', (evt) => {
+        if (evt.target.classList.contains('popup_is-opened')) {
+          closeModal(popup)
+        }
+        if (evt.target.classList.contains('popup__close')) {
+          closeModal(popup)
+        }
+    })
   });
-});
 
-import "./pages/index.css"; // добавьте импорт главного файла стилей
-import {
-  initialCards,
-  addCard,
-  removeCard,
-  AddLikeToCard,
-  zoomCardImg,
-} from "./scripts/cards.js";
-import { openModal, closeModal } from "./scripts/modal.js";
+// Обработчик «отправки» формы редактирования профиля
+function handleProfileFormSubmit(evt) {
+  evt.preventDefault(); 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-// Находим форму в DOM
-const formElement = document.querySelector(".popup__form");
-// Находим поля формы в DOM
-const nameInput = formElement.querySelector(".popup__input_type_name");
-const jobInput = formElement.querySelector(".popup__input_type_description");
-
-// Обработчик «отправки» формы, хотя пока
-// она никуда отправляться не будет
-function handleFormSubmit(evt) {
-  evt.preventDefault(); // Эта строчка отменяет стандартную отправку формы.
-  // Так мы можем определить свою логику отправки.
-  // О том, как это делать, расскажем позже.
-
-  // Получите значение полей jobInput и nameInput из свойства value
   const nameInputValue = nameInput.value;
   const jobInputValue = jobInput.value;
-
-  // Выберите элементы, куда должны быть вставлены значения полей
-  const profileTitle = document.querySelector(".profile__title");
-  const profileDescription = document.querySelector(".profile__description");
   // Вставьте новые значения с помощью textContent
   profileTitle.textContent = nameInputValue;
   profileDescription.textContent = jobInputValue;
+  closePopupSubmit(evt);
 }
 
-// Прикрепляем обработчик к форме:
-// он будет следить за событием “submit” - «отправка»
-formElement.addEventListener("submit", handleFormSubmit);
-// @todo: Слушатель закрытия popUp по кнопке Sumbit
-document.addEventListener("submit", (evt) => {
-  const Modal = evt.target.closest(".popup_is-opened");
-  closeModal(Modal);
-});
-/////////////////////////////////////////////////////////////////////////////////////////////////
+// слушатель «отправки» формы редактирования профиля
+profileForm.addEventListener("submit", handleProfileFormSubmit);
 
-const formNewCard = document.querySelector('[name="new-place"]');
-const PlaceName = formNewCard.querySelector('[name="place-name"]');
-const LinkUrl = formNewCard.querySelector('[name="link"]');
+// функция закрытия формы при отправке
+function closePopupSubmit(evt) {
+  const modal = evt.target.closest(".popup_is-opened");
+  closeModal(modal); 
+}
 
-function AddCardFormSubmit(evt) {
-  // Сброс базовых настроек
+// Обработчик «отправки» формы дабавления карточки
+function handleCardFormSubmit(evt) {
   evt.preventDefault();
-  // Получите значение полей jobInput и nameInput из свойства value
-  const PlaceNameValue = PlaceName.value;
-  const LinkUrlValue = LinkUrl.value;
 
-  const NewCard = {
-    name: PlaceNameValue,
-    link: LinkUrlValue,
+  const placeNameValue = placeName.value;
+  const linkUrlValue = linkUrl.value;
+
+  const newCardItem = {
+    name: placeNameValue,
+    link: linkUrlValue,
   };
 
-  cardList.prepend(
-    addCard(NewCard, removeCard, cardTemplate, AddLikeToCard, zoomCardImg)
-  );
+  addCardElement(newCardItem)
   formNewCard.reset();
+
+  closePopupSubmit(evt);
 }
 
-formNewCard.addEventListener("submit", AddCardFormSubmit);
+// слушатель «отправки» формы добавления карточки
+formNewCard.addEventListener("submit", handleCardFormSubmit);
