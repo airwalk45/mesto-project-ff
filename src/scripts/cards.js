@@ -3,7 +3,9 @@ import { openModal } from "./modal.js";
 // @todo: Функция создания карточки
 
 function addCard(addCardObj) {
-  const cardElement = addCardObj.cardTemplate.querySelector(".card").cloneNode(true);
+  const cardElement = addCardObj.cardTemplate
+    .querySelector(".card")
+    .cloneNode(true);
   const deleteButton = cardElement.querySelector(".card__delete-button");
   const likeButton = cardElement.querySelector(".card__like-button");
   const imgElement = cardElement.querySelector(".card__image");
