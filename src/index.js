@@ -4,7 +4,6 @@
 import "./pages/index.css"; //Главный CSS
 import { addCard, removeCardFromDom, checkLikeCard } from "./scripts/cards.js"; //функции карточек
 import { openModal, closeModal } from "./scripts/modal.js"; //функции попапов
-import { initialCards } from "./scripts/initialCards.js"; //базовые страницы при загрузке
 import { enableValidation, clearValidation } from "./scripts/validation.js";
 import {
   getUserInfo,
@@ -65,7 +64,6 @@ const modalDelete = document.querySelector(".popup_type_confirm"); // попап
 const formDelete = modalDelete.querySelector('[name="delete-confirm"]');
 let cardForDelete = {};
 
-
 const errorClassObject = {
   formSelector: ".popup__form",
   inputSelector: ".popup__input",
@@ -88,47 +86,36 @@ function zoomCardImg(evt) {
   openModal(modalImageZoom);
 }
 
-formDelete.addEventListener('submit', (evt) => {
+formDelete.addEventListener("submit", (evt) => {
   evt.preventDefault();
   renderDeleting(true, evt);
   deleteCard(cardForDelete._id)
-  .then(() => {
-    removeCardFromDom(cardForDelete.cardElement);
-    closeModal(modalDelete);    
-  })
-  .catch((err) => {
-    console.log(err);
-  })
-  .finally(() => {
-    renderDeleting(false, evt);
-  });
-})
+    .then(() => {
+      removeCardFromDom(cardForDelete.cardElement);
+      closeModal(modalDelete);
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+    .finally(() => {
+      renderDeleting(false, evt);
+    });
+});
 
-function addCardElement(item, method = "prepend", userID) {
+function addCardElement(item, method, userID) {
   addCardObj.item = item;
   addCardObj.removeCard = () => {
     cardForDelete._id = item._id;
-    cardForDelete.cardElement = cardElement;    
+    cardForDelete.cardElement = cardElement;
     openModal(modalDelete);
   };
   addCardObj.addLikeToCard = (evt) => {
-    if (evt.target.classList.contains("card__like-button_is-active")) {
-      deleteLike(item._id)
-        .then((newItem) => {
-          checkLikeCard(cardElement, newItem);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } else {
-      putLike(item._id)
-        .then((newItem) => {
-          checkLikeCard(cardElement, newItem);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
+    const likeMethod = evt.target.classList.contains("card__like-button_is-active")? deleteLike: putLike;
+    likeMethod(item._id)
+      .then((newItem) => {
+        checkLikeCard(cardElement, newItem);
+      })
+      .catch((err) => console.log(err));
   };
   const cardElement = addCard(addCardObj, userID);
   cardList[method](cardElement);
@@ -167,10 +154,8 @@ buttonEdit.addEventListener("click", () => {
 
 popups.forEach((popup) => {
   popup.addEventListener("mousedown", (evt) => {
-    if (evt.target.classList.contains("popup_is-opened")) {
-      closeModal(popup);
-    }
-    if (evt.target.classList.contains("popup__close")) {
+    if (evt.target.classList.contains("popup_is-opened") || 
+        evt.target.classList.contains("popup__close")) {
       closeModal(popup);
     }
   });
@@ -183,9 +168,6 @@ function handleProfileFormSubmit(evt) {
   const nameInputValue = nameInput.value;
   const jobInputValue = jobInput.value;
 
-  profileTitle.textContent = nameInputValue;
-  profileDescription.textContent = jobInputValue;
-
   const userInfo = {
     name: nameInputValue,
     about: jobInputValue,
@@ -194,7 +176,9 @@ function handleProfileFormSubmit(evt) {
   renderLoading(true, evt);
 
   patchUserInfo(userInfo)
-    .then(() => {
+    .then((newUserInfo) => {
+      profileTitle.textContent = newUserInfo.name;
+      profileDescription.textContent = newUserInfo.about;
       closePopupSubmit(evt);
     })
     .catch((err) => {
@@ -238,7 +222,6 @@ function handleCardFormSubmit(evt) {
       renderLoading(false, evt);
     });
 
-  //addCardElement(newCardItem);
   formNewCard.reset();
 
   closePopupSubmit(evt);
@@ -256,11 +239,13 @@ function changeProfileData(profileData) {
 }
 
 Promise.all([getUserInfo(), getCardsList()])
-  .then((results) => {
-    changeProfileData(results[0]);
+  .then(([userData, cards]) => {
 
-    results[1].forEach((item) => {
-      addCardElement(item, "append", results[0]._id);
+    changeProfileData(userData);
+
+
+    cards.forEach((item) => {
+      addCardElement(item, "append", userData._id);
     });
   })
   .catch((err) => {
@@ -273,8 +258,8 @@ function handleAvatarFormSubmit(evt) {
   renderLoading(true, evt);
   const linkAvatarValue = avatarUrl.value;
   patchUserAvatar(linkAvatarValue)
-    .then(() => {
-      profileImg.style = "background-image: url(" + linkAvatarValue + ")";
+    .then((result) => {
+      profileImg.style = `background-image: url(${result.avatar})`;
     })
     .catch((err) => {
       console.log(err);
@@ -283,7 +268,6 @@ function handleAvatarFormSubmit(evt) {
       renderLoading(false, evt);
     });
 
-  //addCardElement(newCardItem);
   avatarForm.reset();
 
   closePopupSubmit(evt);
@@ -294,18 +278,10 @@ avatarForm.addEventListener("submit", handleAvatarFormSubmit);
 
 function renderLoading(isLoading, evt) {
   const button = evt.target.querySelector(".popup__button");
-  if (isLoading) {
-    button.textContent = "Сохранение...";
-  } else {
-    button.textContent = "Сохранить";
-  }
+  button.textContent = isLoading ? "Сохранение..." : "Сохранить"
 }
 
 function renderDeleting(isLoading, evt) {
   const button = evt.target.querySelector(".popup__button");
-  if (isLoading) {
-    button.textContent = "Удаляем...";
-  } else {
-    button.textContent = "Да";
-  }
+  button.textContent = isLoading ? "Удаляем..." : "Да"
 }

@@ -79,8 +79,10 @@ function hasInvalidInput(inputList) {
 function toggleButtonState(inputList, buttonElement, errorClassObject) {
   if (hasInvalidInput(inputList)) {
     buttonElement.classList.add(errorClassObject.inactiveButtonClass);
+    buttonElement.disabled = true;
   } else {
     buttonElement.classList.remove(errorClassObject.inactiveButtonClass);
+    buttonElement.disabled = false;
   }
 }
 
@@ -101,6 +103,7 @@ const clearValidation = (formElement, errorClassObject) => {
     inputElement.setCustomValidity("");
     //  });
   });
+  formElement.reset()
   toggleButtonState(inputList, buttonElement, errorClassObject);
 };
 

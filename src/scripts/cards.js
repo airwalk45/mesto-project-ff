@@ -1,4 +1,3 @@
-import { openModal } from "./modal.js";
 
 // @todo: Функция создания карточки
 
@@ -24,9 +23,7 @@ function addCard(addCardObj, userID) {
 
   if (addCardObj.item.likes.some(hasMyLike)) {
     likeButton.classList.add("card__like-button_is-active");
-  } else {
-    likeButton.classList.remove("card__like-button_is-active");
-  }
+  } 
 
   likeButton.addEventListener("click", addCardObj.addLikeToCard);
 

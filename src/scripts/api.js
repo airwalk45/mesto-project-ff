@@ -2,18 +2,20 @@ const apiToken = "7e5bc3b7-9b3c-4476-a6ed-5dc02c289290";
 const apiId = "wff-cohort-10";
 const apiServer = "https://mesto.nomoreparties.co";
 
+const handleResponse = (res) => {
+  if (res.ok) {
+    return res.json()
+  }
+  return Promise.reject(res.status);
+}
+
 //Загрузка информации о пользователе с сервера
 const getUserInfo = () => {
   return fetch(apiServer + "/v1/" + apiId + "/users/me", {
     headers: {
       authorization: apiToken,
     },
-  }).then((res) => {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(res.status);
-  });
+  }).then(handleResponse);
 };
 
 //Загрузка карточек с сервера
@@ -22,12 +24,7 @@ const getCardsList = () => {
     headers: {
       authorization: apiToken,
     },
-  }).then((res) => {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(res.status);
-  });
+  }).then(handleResponse);
 };
 
 //Редактирование профиля
@@ -42,12 +39,7 @@ function patchUserInfo(userInfo) {
       name: userInfo.name,
       about: userInfo.about,
     }),
-  }).then((res) => {
-    if (res.ok) {
-      return res;
-    }
-    return Promise.reject(res.status);
-  });
+  }).then(handleResponse);
 }
 
 //Добавление новой карточки
@@ -62,12 +54,7 @@ const patchCard = (cardInfo) => {
       name: cardInfo.name,
       link: cardInfo.link,
     }),
-  }).then((res) => {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(res.status);
-  });
+  }).then(handleResponse);
 };
 
 //Удаление карточки
@@ -78,12 +65,7 @@ function deleteCard(id) {
       authorization: apiToken,
     },
   })
-  .then((res) => {
-    if (res.ok) {
-      return res;
-    }
-    return Promise.reject(res.status);
-  });
+  .then(handleResponse);
 }
 
 //Постановка лайка
@@ -93,12 +75,7 @@ function putLike(id) {
     headers: {
       authorization: apiToken,
     },
-  }).then((res) => {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(res.status);
-  });
+  }).then(handleResponse);
 }
 
 ////Снятие лайка
@@ -108,12 +85,7 @@ function deleteLike(id) {
     headers: {
       authorization: apiToken,
     },
-  }).then((res) => {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(res.status);
-  });
+  }).then(handleResponse);
 }
 
 //Редактирование аватара
@@ -127,12 +99,7 @@ function patchUserAvatar(linkAvatarValue) {
     body: JSON.stringify({
       avatar: linkAvatarValue,
     }),
-  }).then((res) => {
-    if (res.ok) {
-      return res;
-    }
-    return Promise.reject(res.status);
-  });
+  }).then(handleResponse);
 }
 
 export {
